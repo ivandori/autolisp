@@ -1,0 +1,120 @@
+;;;=============================================================================
+;;; 6. FUNZIONI DIMOSTRATIVE
+;;;=============================================================================
+;;; DEMO-SS-MODIFICA
+;;; Dimostra modifiche massive su SS
+(defun c:demo-ss-mod (/ ss count layer)
+  (princ "\n=== DEMO MODIFICA SELECTION SET ===")
+  (princ "\n\nSeleziona entita' da modificare...")
+  (setq ss (ssget))
+  (if ss
+    (progn
+      (setq count (ss-length ss))
+      (princ (strcat "\n\n" (itoa count) " entita' selezionate"))
+      (princ "\n\n1. Spostamento su layer 0...")
+      (set-ss-to-layer ss "0")
+      (princ " OK")
+      (princ "\n2. Cambio colore in rosso...")
+      (set-ss-color ss 1)
+      (princ " OK")
+      (princ "\n3. Rigenero disegno...")
+      (command "_.regen")
+      (princ " OK")
+      (princ "\n\n=== Demo completata ==="))
+    (princ "\nNessuna entita' selezionata!"))
+  (princ))
+;;; DEMO-SS-RICERCA
+;;; Dimostra ricerca in SS
+(defun c:demo-ss-search (/ ss left right top bottom)
+  (princ "\n=== DEMO RICERCA IN SELECTION SET ===")
+  (princ "\n\nSeleziona entita'...")
+  (setq ss (ssget))
+  (if ss
+    (progn
+      (princ (strcat "\n\n" (itoa (ss-length ss)) " entita' selezionate"))
+      (princ "\n\nRicerca posizioni estreme...")
+      (setq left (find-leftmost-entity ss)
+            right (find-rightmost-entity ss)
+            top (find-topmost-entity ss)
+            bottom (find-bottommost-entity ss))
+      (princ "\n\nEvidenziazione entita' trovate...")
+      (if left (progn (princ "\nPiu' a SINISTRA") (redraw left 3)))
+      (getstring "\nPremi Invio...")
+      (if left (redraw left 4))
+      (if right (progn (princ "\nPiu' a DESTRA") (redraw right 3)))
+      (getstring "\nPremi Invio...")
+      (if right (redraw right 4))
+      (if top (progn (princ "\nPiu' in ALTO") (redraw top 3)))
+      (getstring "\nPremi Invio...")
+      (if top (redraw top 4))
+      (if bottom (progn (princ "\nPiu' in BASSO") (redraw bottom 3)))
+      (getstring "\nPremi Invio...")
+      (if bottom (redraw bottom 4))
+      (princ "\n\n=== Demo completata ==="))
+    (princ "\nNessuna entita' selezionata!"))
+  (princ))
+;;; DEMO-SS-BOX
+;;; Dimostra bounding box SS
+(defun c:demo-ss-box (/ ss bbox dims center)
+  (princ "\n=== DEMO BOUNDING BOX SELECTION SET ===")
+  (princ "\n\nSeleziona entita'...")
+  (setq ss (ssget))
+  (if ss
+    (progn
+      (princ (strcat "\n\n" (itoa (ss-length ss)) " entita' selezionate"))
+      (if (setq bbox (get-ss-bounding-box ss))
+        (progn
+          (setq dims (get-ss-dimensions ss)
+                center (get-ss-center ss))
+          (princ "\n\nBounding Box:")
+          (princ (strcat "\n  Min: " (punto-a-stringa (car bbox))))
+          (princ (strcat "\n  Max: " (punto-a-stringa (cadr bbox))))
+          (princ (strcat "\n  Larghezza: " (rtos (car dims) 2 2)))
+          (princ (strcat "\n  Altezza: " (rtos (cadr dims) 2 2)))
+          (princ (strcat "\n  Centro: " (punto-a-stringa center)))
+          (princ "\n\nDisegno rettangolo bounding box...")
+          (draw-ss-box ss 1)
+          (princ " OK")
+          (princ "\n\nZoom su selezione...")
+          (zoom-to-ss ss 10.0)
+          (princ " OK"))
+        (princ "\nImpossibile calcolare bounding box!"))
+      (princ "\n\n=== Demo completata ==="))
+    (princ "\nNessuna entita' selezionata!"))
+  (princ))
+;;; DEMO-SS-STATISTICHE
+;;; Dimostra statistiche SS
+(defun c:demo-ss-stats (/ ss counts)
+  (princ "\n=== DEMO STATISTICHE SELECTION SET ===")
+  (princ "\n\nSeleziona entita'...")
+  (setq ss (ssget))
+  (if ss
+    (progn
+      (princ (strcat "\n\nTotale entita': " (itoa (ss-length ss))))
+      (setq counts (count-ss-by-type ss))
+      (princ "\n\nConteggio per tipo:")
+      (foreach pair counts
+        (princ (strcat "\n  " (car pair) ": " (itoa (cdr pair)))))
+      (princ "\n\n=== Demo completata ==="))
+    (princ "\nNessuna entita' selezionata!"))
+  (princ))
+;;; DEMO-TUTTO-SS
+;;; Esegue tutte le demo SS
+(defun c:demo-ss ()
+  (princ "\n")
+  (princ "\n+========================================================+")
+  (princ "\n|  GESTIONE SELECTION SET - DIMOSTRAZIONE COMPLETA      |")
+  (princ "\n+========================================================+")
+  (princ "\n")
+  (c:demo-ss-mod)
+  (princ "\n\nPremi Invio per continuare...") (getstring)
+  (c:demo-ss-search)
+  (princ "\n\nPremi Invio per continuare...") (getstring)
+  (c:demo-ss-box)
+  (princ "\n\nPremi Invio per continuare...") (getstring)
+  (c:demo-ss-stats)
+  (princ "\n")
+  (princ "\n+========================================================+")
+  (princ "\n|    TUTTE LE DEMO SELECTION SET COMPLETATE             |")
+  (princ "\n+========================================================+")
+  (princ))
